@@ -1,0 +1,9 @@
+Hi,
+
+I would like to highlight the changes on implementing this solution:
+1. A class SimonOrchestrator implementing Orchestrator interface is created. Most logic is implemented on this implementation class.
+2. On Event interface, an additional signature isRoot() is added to indicate if it is the root event i.e. the event triggering all processing flow. 
+3. For each Processor implementation class, there is a function named interestedIn(Event event) implemented but not be called. It is missed on AbstractProcessor class. A call to interestedIn() function is called on inner class EventTask.run() in AbstractProcessor. This make the filtering logic effective.
+4. On ShippigProcessor class, it seem the processInternal() function raised MarginEvent() by mistake. I believe it should raise the ShippingEvent() to make the whole process flow make sense. More importantly, it is needed to trigger the whole event process flow to make the JUnit pass.
+5. On AbstractProcessor class, a thread is created to handle each event arrival. Even there is a thread pool created to manage thread usage, however, overhead on thread creation will be large, especially under high transaction volume. To improve this, we can consider to create a set of processor and pass the event to a processor via queue (e.g. LinkedBlockingQueue). For extremely high loading scenarios, you can even consider to use busy spin approach to save time on CPU context switching.
+6. With above changes, 2 JUNit on SimpleOrchestrator completed successfully.
